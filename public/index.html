@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>桃園公車稽查儀表板</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- 標題列 -->
+        <header class="header">
+            <h1>🚌 桃園公車稽查儀表板</h1>
+            <div class="header-info">
+                <span class="period">資料期間：2025年1月-7月</span>
+                <div class="last-update">
+                    最後更新：<span id="lastUpdate">載入中...</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- 總覽卡片 -->
+        <section class="overview-cards">
+            <div class="card">
+                <div class="card-icon">📊</div>
+                <div class="card-content">
+                    <h3>總稽查次數</h3>
+                    <div class="card-value" id="totalInspections">-</div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-icon">🏢</div>
+                <div class="card-content">
+                    <h3>客運公司數</h3>
+                    <div class="card-value" id="totalCompanies">-</div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-icon">🚍</div>
+                <div class="card-content">
+                    <h3>稽查路線數</h3>
+                    <div class="card-value" id="totalRoutes">-</div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-icon">🚐</div>
+                <div class="card-content">
+                    <h3>稽查車輛數</h3>
+                    <div class="card-value" id="totalVehicles">-</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 圖表區域 -->
+        <section class="charts-section">
+            <div class="chart-row">
+                <div class="chart-container">
+                    <h3>📈 月份稽查統計</h3>
+                    <canvas id="monthlyChart"></canvas>
+                </div>
+                <div class="chart-container">
+                    <h3>🎯 指差執行統計</h3>
+                    <canvas id="guidanceChart"></canvas>
+                </div>
+            </div>
+            
+            <div class="chart-row">
+                <div class="chart-container">
+                    <h3>🏢 客運公司稽查次數</h3>
+                    <canvas id="companyChart"></canvas>
+                </div>
+                <div class="chart-container">
+                    <h3>⚠️ 違規項目統計</h3>
+                    <canvas id="violationChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- 篩選器 -->
+        <section class="filters-section">
+            <h3>🔍 稽查記錄查詢</h3>
+            <div class="filters">
+                <div class="filter-group">
+                    <label for="companyFilter">客運公司：</label>
+                    <select id="companyFilter">
+                        <option value="">全部</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="monthFilter">月份：</label>
+                    <select id="monthFilter">
+                        <option value="">全部</option>
+                        <option value="1月">1月</option>
+                        <option value="2月">2月</option>
+                        <option value="3月">3月</option>
+                        <option value="4月">4月</option>
+                        <option value="5月">5月</option>
+                        <option value="6月">6月</option>
+                        <option value="7月">7月</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="routeFilter">路線：</label>
+                    <input type="text" id="routeFilter" placeholder="輸入路線號碼">
+                </div>
+                <button id="searchBtn" class="search-btn">搜尋</button>
+                <button id="resetBtn" class="reset-btn">重置</button>
+            </div>
+        </section>
+
+        <!-- 資料表格 -->
+        <section class="table-section">
+            <div class="table-header">
+                <h3>📋 詳細稽查記錄</h3>
+                <div class="table-info">
+                    <span id="recordCount">載入中...</span>
+                    <div class="pagination-info">
+                        <span id="pageInfo">第 1 頁</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="table-container">
+                <table id="inspectionTable">
+                    <thead>
+                        <tr>
+                            <th>編號</th>
+                            <th>日期</th>
+                            <th>路線</th>
+                            <th>公司</th>
+                            <th>車牌</th>
+                            <th>區域</th>
+                            <th>指差</th>
+                            <th>路線圖</th>
+                            <th>意見箱</th>
+                            <th>LED</th>
+                            <th>服務熱忱</th>
+                            <th>早發</th>
+                            <th>誤點</th>
+                            <th>月份</th>
+                        </tr>
+                    </thead>
+                    <tbody id="inspectionTableBody">
+                        <tr>
+                            <td colspan="14" class="loading">載入中...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="pagination">
+                <button id="prevPage" class="page-btn" disabled>上一頁</button>
+                <div class="page-numbers" id="pageNumbers"></div>
+                <button id="nextPage" class="page-btn">下一頁</button>
+            </div>
+        </section>
+
+        <!-- 路線統計 -->
+        <section class="route-stats-section">
+            <h3>🛣️ 熱門路線統計</h3>
+            <div class="route-stats-container">
+                <canvas id="routeChart"></canvas>
+            </div>
+        </section>
+    </div>
+
+    <!-- 載入指示器 -->
+    <div id="loadingIndicator" class="loading-indicator">
+        <div class="spinner"></div>
+        <span>載入中...</span>
+    </div>
+
+    <!-- 錯誤訊息 -->
+    <div id="errorMessage" class="error-message" style="display: none;">
+        <span class="error-text"></span>
+        <button class="close-error">×</button>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
